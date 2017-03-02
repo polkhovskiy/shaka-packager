@@ -330,7 +330,10 @@ Status EncryptingFragmenter::EncryptSample(
           uint64_t current_clear_bytes =
               nalu.header_size() + video_slice_header_size;
           uint64_t cipher_bytes = nalu.payload_size() - video_slice_header_size;
-
+if (cipher_bytes == 63491)
+{
+	fprintf(stderr, "bad frame!\n");
+}
           // ISO/IEC 23001-7:2016 10.2 'cbc1' 10.3 'cens'
           // The BytesOfProtectedData size SHALL be a multiple of 16 bytes to
           // avoid partial blocks in Subsamples.

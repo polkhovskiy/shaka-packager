@@ -605,7 +605,7 @@ H264Parser::Result H264Parser::ParseSps(const Nalu& nalu, int* sps_id) {
   READ_BITS_OR_RETURN(8, &sps->level_idc);
   READ_UE_OR_RETURN(&sps->seq_parameter_set_id);
   TRUE_OR_RETURN(sps->seq_parameter_set_id < 32);
-
+fprintf(stderr, "sps->profile_idc: %d\n", sps->profile_idc);
   if (sps->profile_idc == 100 || sps->profile_idc == 110 ||
       sps->profile_idc == 122 || sps->profile_idc == 244 ||
       sps->profile_idc == 44 || sps->profile_idc == 83 ||
@@ -936,6 +936,7 @@ H264Parser::Result H264Parser::ParseDecRefPicMarking(H26xBitReader* br,
     H264DecRefPicMarking* marking;
     if (shdr->adaptive_ref_pic_marking_mode_flag) {
       size_t i;
+fprintf(stderr, "arraysize(shdr->ref_pic_marking): %lu\n", arraysize(shdr->ref_pic_marking));	  	  
       for (i = 0; i < arraysize(shdr->ref_pic_marking); ++i) {
         marking = &shdr->ref_pic_marking[i];
 
@@ -973,6 +974,8 @@ H264Parser::Result H264Parser::ParseDecRefPicMarking(H26xBitReader* br,
 
 H264Parser::Result H264Parser::ParseSliceHeader(const Nalu& nalu,
                                                 H264SliceHeader* shdr) {
+													
+fprintf(stderr, "H264Parser::ParseSliceHeader\n");
   // See 7.4.3.
   const H264Sps* sps;
   const H264Pps* pps;
@@ -1018,6 +1021,7 @@ H264Parser::Result H264Parser::ParseSliceHeader(const Nalu& nalu,
     READ_UE_OR_RETURN(&shdr->idr_pic_id);
 
   if (sps->pic_order_cnt_type == 0) {
+	  
     READ_BITS_OR_RETURN(sps->log2_max_pic_order_cnt_lsb_minus4 + 4,
                         &shdr->pic_order_cnt_lsb);
     if (pps->bottom_field_pic_order_in_frame_present_flag &&
@@ -1117,6 +1121,58 @@ H264Parser::Result H264Parser::ParseSliceHeader(const Nalu& nalu,
   }
 
   shdr->header_bit_size = nalu.payload_size() * 8 - br->NumBitsLeft();
+  
+  fprintf(stderr, "======= SPS =======\n");
+  fprintf(stderr, "sps.chroma_array_type: %d\n", sps->chroma_array_type);
+  
+  fprintf(stderr, "======= slice info =======\n");
+  fprintf(stderr, "header_bit_size: %lu\n", shdr->header_bit_size);
+  fprintf(stderr, "first_mb_in_slice: %d\n", shdr->first_mb_in_slice);
+  fprintf(stderr, "slice_type: %d\n", shdr->slice_type);
+  fprintf(stderr, "pic_parameter_set_id: %d\n", shdr->pic_parameter_set_id);
+  fprintf(stderr, "colour_plane_id: %d\n", shdr->colour_plane_id);
+  fprintf(stderr, "frame_num: %d\n", shdr->frame_num);
+  fprintf(stderr, "field_pic_flag: %d\n", shdr->field_pic_flag);
+  fprintf(stderr, "bottom_field_flag: %d\n", shdr->bottom_field_flag);
+  fprintf(stderr, "idr_pic_id: %d\n", shdr->idr_pic_id);
+  fprintf(stderr, "pic_order_cnt_lsb: %d\n", shdr->pic_order_cnt_lsb);
+  fprintf(stderr, "delta_pic_order_cnt_bottom: %d\n", shdr->delta_pic_order_cnt_bottom);
+  fprintf(stderr, "redundant_pic_cnt: %d\n", shdr->redundant_pic_cnt);
+  fprintf(stderr, "direct_spatial_mv_pred_flag: %d\n", shdr->direct_spatial_mv_pred_flag);
+  fprintf(stderr, "num_ref_idx_active_override_flag: %d\n", shdr->num_ref_idx_active_override_flag);
+  fprintf(stderr, "num_ref_idx_l0_active_minus1: %d\n", shdr->num_ref_idx_l0_active_minus1);
+  fprintf(stderr, "num_ref_idx_l1_active_minus1: %d\n", shdr->num_ref_idx_l1_active_minus1);
+  fprintf(stderr, "ref_pic_list_modification_flag_l0: %d\n", shdr->ref_pic_list_modification_flag_l0);
+  fprintf(stderr, "shdr->ref_list_l0_modifications->abs_diff_pic_num_minus1: %d\n", shdr->ref_list_l0_modifications->abs_diff_pic_num_minus1);
+  fprintf(stderr, "shdr->ref_list_l0_modifications->long_term_pic_num: %d\n", shdr->ref_list_l0_modifications->long_term_pic_num);
+  fprintf(stderr, "ref_pic_list_modification_flag_l1: %d\n", shdr->ref_pic_list_modification_flag_l1);  
+  fprintf(stderr, "luma_log2_weight_denom: %d\n", shdr->luma_log2_weight_denom);
+  fprintf(stderr, "chroma_log2_weight_denom: %d\n", shdr->chroma_log2_weight_denom);
+  fprintf(stderr, "luma_weight_l0_flag: %d\n", shdr->luma_weight_l0_flag);
+  fprintf(stderr, "chroma_weight_l0_flag: %d\n", shdr->chroma_weight_l0_flag);
+  
+  fprintf(stderr, "luma_weight_l1_flag: %d\n", shdr->luma_weight_l1_flag);
+  fprintf(stderr, "chroma_weight_l1_flag: %d\n", shdr->chroma_weight_l1_flag);
+  fprintf(stderr, "no_output_of_prior_pics_flag: %d\n", shdr->no_output_of_prior_pics_flag);
+  fprintf(stderr, "long_term_reference_flag: %d\n", shdr->long_term_reference_flag);
+  fprintf(stderr, "adaptive_ref_pic_marking_mode_flag: %d\n", shdr->adaptive_ref_pic_marking_mode_flag);
+  fprintf(stderr, "cabac_init_idc: %d\n", shdr->cabac_init_idc);
+  fprintf(stderr, "slice_qp_delta: %d\n", shdr->slice_qp_delta);
+  fprintf(stderr, "sp_for_switch_flag: %d\n", shdr->sp_for_switch_flag);
+  fprintf(stderr, "slice_qs_delta: %d\n", shdr->slice_qs_delta);
+  fprintf(stderr, "disable_deblocking_filter_idc: %d\n", shdr->disable_deblocking_filter_idc);
+  fprintf(stderr, "slice_alpha_c0_offset_div2: %d\n", shdr->slice_alpha_c0_offset_div2);
+  fprintf(stderr, "slice_beta_offset_div2: %d\n", shdr->slice_beta_offset_div2);
+  
+  /*
+  H264ModificationOfPicNum ref_list_l0_modifications[kRefListModSize];
+  H264ModificationOfPicNum ref_list_l1_modifications[kRefListModSize];
+  int delta_pic_order_cnt[2];
+  H264WeightingFactors pred_weight_table_l1;
+  H264DecRefPicMarking ref_pic_marking[kRefListSize];
+  fprintf(stderr, "pred_weight_table_l0: %d\n", shdr->pred_weight_table_l0);
+  */
+  
   return kOk;
 }
 
